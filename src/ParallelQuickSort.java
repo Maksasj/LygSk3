@@ -8,12 +8,12 @@ public class ParallelQuickSort {
     private final int[] array;
 
     private final int splitThreshold;
-    private final boolean debugModeMode;
+    private final boolean debugMode;
     private final int threadCount;
 
-    public ParallelQuickSort(int[] array, boolean debugModeMode, int threadCount, int splitThreshold) {
+    public ParallelQuickSort(int[] array, boolean debugMode, int threadCount, int splitThreshold) {
         this.array = array;
-        this.debugModeMode = debugModeMode;
+        this.debugMode = debugMode;
         this.threadCount = threadCount;
         this.splitThreshold = splitThreshold;
     }
@@ -23,7 +23,7 @@ public class ParallelQuickSort {
         private final int high;
 
         SortTask(int low, int high) {
-            if(debugModeMode)
+            if(debugMode)
                 System.out.printf("Created sort task with bound parameters [%d, %d]%n", low, high);
 
             this.low = low;
@@ -33,7 +33,8 @@ public class ParallelQuickSort {
         @Override
         protected void compute() {
             if (high - low < splitThreshold) {
-                System.out.println("Range is under split threshold, stop split");
+                if(debugMode)
+                    System.out.println("Range is under split threshold, stop split");
 
                 Arrays.sort(array, low, high + 1);
                 return;
@@ -41,7 +42,8 @@ public class ParallelQuickSort {
 
             int pivotIndex = partition(low, high);
 
-            System.out.printf("Partiion pivot index %d %n", pivotIndex);
+            if(debugMode)
+                System.out.printf("Partiion pivot index %d %n", pivotIndex);
 
             SortTask leftTask = null;
             if (low < pivotIndex - 1)
@@ -90,7 +92,7 @@ public class ParallelQuickSort {
     }
 
     public void sort() {
-        if(debugModeMode)
+        if(debugMode)
             System.out.println("Started sorting");
 
         ForkJoinPool pool = new ForkJoinPool(threadCount);
@@ -104,7 +106,7 @@ public class ParallelQuickSort {
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
 
-        if(debugModeMode)
+        if(debugMode)
             System.out.println("Ended sorting");
     }
 
@@ -159,14 +161,25 @@ public class ParallelQuickSort {
             return;
         }
 
+        /*
+        for(int i = 1; i < 48; ++i) {
+            runTest(10_000_000, i, 32000, false);
+        }
+        */
+
+        /*
         runTest(10_000_000, 1, 1000, false);
         runTest(10_000_000, 2, 1000, false);
         runTest(10_000_000, 4, 1000, false);
+        runTest(10_000_000, 6, 1000, false);
         runTest(10_000_000, 8, 1000, false);
+        runTest(10_000_000, 12, 1000, false);
         runTest(10_000_000, 16, 1000, false);
+        runTest(10_000_000, 24, 1000, false);
         runTest(10_000_000, 32, 1000, false);
+        */
 
-        // runTest(sampleArraySize, threadCount, splitThreshold, debugMode);
+        runTest(sampleArraySize, threadCount, splitThreshold, debugMode);
     }
 
     private static int[] generateRandomArray(int size) {
